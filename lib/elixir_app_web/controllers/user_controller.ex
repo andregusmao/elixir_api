@@ -7,16 +7,24 @@ defmodule ElixirAppWeb.UserController do
   action_fallback ElixirAppWeb.FallbackController
 
   def index(conn, _params) do
-    user = Accounts.list_user()
-    render(conn, "index.json", user: user)
+    try do
+      user = Accounts.list_user()
+      render(conn, "index.json", user: user)
+    rescue
+      ArgumentError -> generic_error(conn)
+    end
   end
 
   def create(conn, %{"user" => user_params}) do
-    with {:ok, %User{} = user} <- Accounts.create_user(user_params) do
-      conn
-      |> put_status(:created)
-      |> put_resp_header("location", Routes.user_path(conn, :show, user))
-      |> render("show.json", user: user)
+    try do
+      with {:ok, %User{} = user} <- Accounts.create_user(user_params) do
+        conn
+        |> put_status(:created)
+        |> put_resp_header("location", Routes.user_path(conn, :show, user))
+        |> render("show.json", user: user)
+      end
+    rescue
+      ArgumentError -> generic_error(conn)
     end
   end
 
@@ -55,5 +63,11 @@ defmodule ElixirAppWeb.UserController do
     conn
     |> put_status(404)
     |> render("notfound.json")
+  end
+
+  defp generic_error(conn) do
+    conn
+    |> put_status(500)
+    |> render("generic_error.json")
   end
 end

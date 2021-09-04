@@ -20,4 +20,8 @@ defmodule ElixirAppWeb.UserView do
   def render("notfound.json", _params) do
     %{message: "user not found"}
   end
+
+  def render("generic_error.json", _params) do
+    %{message: "an error occcurred"}
+  end
 end
